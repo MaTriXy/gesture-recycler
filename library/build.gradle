@@ -1,11 +1,30 @@
 apply plugin: 'com.android.library'
-
-def version = '1.5.0'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
 
 ext {
-    PUBLISH_GROUP_ID = 'com.thesurix.gesturerecycler'
-    PUBLISH_ARTIFACT_ID = 'gesture-recycler'
-    PUBLISH_VERSION = version
+    bintrayRepo = 'maven'
+    bintrayName = 'gesture-recycler'
+
+    publishedGroupId = 'com.thesurix.gesturerecycler'
+    libraryName = 'Gesture Recycler'
+    artifact = 'gesture-recycler'
+
+    libraryDescription = ' This library provides swipe & drag and drop support for RecyclerView. '
+
+    siteUrl = 'https://github.com/thesurix/gesture-recycler'
+    gitUrl = 'https://github.com/thesurix/gesture-recycler.git'
+
+    libraryVersion = '1.9.0'
+
+    developerId = 'thesurix'
+    developerName = 'Pawel Surowka'
+    developerEmail = 'thesurix@gmail.com'
+    organization = 'thesurix'
+
+    licenseName = 'The Apache Software License, Version 2.0'
+    licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+    allLicenses = ["Apache-2.0"]
 }
 
 android {
@@ -27,9 +46,18 @@ android {
 }
 
 dependencies {
-    testCompile 'junit:junit:4.12'
     implementation supportDependencies.recyclerView
     implementation supportDependencies.appCompat
+    implementation langDependencies.kotlin
+
+    testImplementation testDependencies.junit
+    testImplementation testDependencies.mockito
+    testImplementation testDependencies.junitKotlin
 }
 
-apply from: 'https://raw.githubusercontent.com/blundell/release-android-library/master/android-release-aar.gradle'
+tasks.withType(Javadoc).all {
+    enabled = false
+}
+
+apply from: 'https://raw.githubusercontent.com/quangctkm9207/template-files/master/android/gradle/install.gradle'
+apply from: 'https://raw.githubusercontent.com/quangctkm9207/template-files/master/android/gradle/bintray.gradle'

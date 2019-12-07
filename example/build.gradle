@@ -1,4 +1,6 @@
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
 
 android {
     compileSdkVersion compileSdk
@@ -20,18 +22,18 @@ android {
     lintOptions {
         disable 'InvalidPackage'
     }
+    dataBinding {
+        enabled = true
+    }
 }
 
 dependencies {
     implementation project(':gesture-recycler')
-    implementation files('libs/glide-full-4.6.0.jar')
-    implementation viewDependencies.butterKnife
-    annotationProcessor viewDependencies.butterKnifeAnnotation
+    implementation exampleDependencies.glide
+    annotationProcessor exampleDependencies.glideCompiler
     implementation supportDependencies.cardView
     implementation supportDependencies.recyclerView
     implementation supportDependencies.appCompat
     implementation supportDependencies.design
-
-    testCompile 'junit:junit:4.12'
-
+    implementation langDependencies.kotlin
 }
