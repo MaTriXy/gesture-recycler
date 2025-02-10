@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.*
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import com.thesurix.example.gesturerecycler.R
 import com.thesurix.example.gesturerecycler.adapter.MonthsAdapter
@@ -20,6 +21,7 @@ class EmptyViewFragment : BaseFragment() {
 
     private var adapter: MonthsAdapter? = null
 
+    private var headerFooterState = false
     override val months: MutableList<MonthItem>
         get() {
             return mutableListOf(Month("JAN", R.drawable.january),
@@ -46,7 +48,7 @@ class EmptyViewFragment : BaseFragment() {
             data = months
             setUndoSize(2)
             setDataChangeListener(object : GestureAdapter.OnDataChangeListener<MonthItem> {
-                override fun onItemRemoved(item: MonthItem, position: Int) {
+                override fun onItemRemoved(item: MonthItem, position: Int, direction: Int) {
                     val undoSnack = Snackbar.make(view, "Month removed from position $position", Snackbar.LENGTH_SHORT)
                     undoSnack.setAction(R.string.undo_text) { adapter?.undoLast() }
                     undoSnack.show()
@@ -76,12 +78,14 @@ class EmptyViewFragment : BaseFragment() {
 
         gestureManager = GestureManager.Builder(recyclerView)
                 .setSwipeEnabled(true)
-                .setSwipeFlags(ItemTouchHelper.LEFT)
+                .setSwipeFlags(ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT)
                 .setLongPressDragEnabled(true)
+                .setHeaderEnabled(headerFooterState)
+                .setFooterEnabled(headerFooterState)
                 .build()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater) {
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.recycler_empty_menu, menu)
     }
 
@@ -100,6 +104,16 @@ class EmptyViewFragment : BaseFragment() {
                 diffMonths.shuffle()
                 adapter?.setData(diffMonths, MonthDiffCallback(adapter!!.data, diffMonths))
                 recyclerView.scrollToPosition(0)
+            }
+            R.id.add -> {
+                val months = months
+                val month = (Math.random() * months.size).toInt()
+                adapter?.add(months[month])
+            }
+            R.id.toggle_hf -> {
+                headerFooterState = !headerFooterState
+                adapter?.setHeaderEnabled(headerFooterState)
+                adapter?.setFooterEnabled(headerFooterState)
             }
         }
         return super.onOptionsItemSelected(item)

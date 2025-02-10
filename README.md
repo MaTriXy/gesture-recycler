@@ -1,4 +1,3 @@
-[ ![Download](https://api.bintray.com/packages/thesurix/maven/gesture-recycler/images/download.svg) ](https://bintray.com/thesurix/maven/gesture-recycler/_latestVersion)
 <a href="https://opensource.org/licenses/Apache-2.0" target="_blank"><img src="https://img.shields.io/badge/License-Apache_v2.0-blue.svg?style=flat"/></a> 
 [![API](https://img.shields.io/badge/API-15%2B-brightgreen.svg?style=flat)](https://android-arsenal.com/api?level=15)
 [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-gesture--recycler-green.svg?style=true)](https://android-arsenal.com/details/1/3317)
@@ -11,7 +10,7 @@ This library provides swipe & drag and drop support for RecyclerView. Based on g
 
 # Features
 * item click/long press/double tap listener
-* background view for swipeable items
+* background views for swipeable items
 * empty view
 * undo
 * swipe 
@@ -20,14 +19,19 @@ This library provides swipe & drag and drop support for RecyclerView. Based on g
 * support for different layout managers
 * predefined drag & swipe flags for RecyclerView's layout managers
 * DiffUtil feature
+* header/footer
 
 # Dependency
 
 To use this library in your android project, just simply add the following dependency into your build.gradle
 
 ```sh
+repositories {
+    mavenCentral()
+}
+
 dependencies {
-    implementation 'com.thesurix.gesturerecycler:gesture-recycler:1.9.0'
+    implementation "com.github.thesurix:gesture-recycler:1.17.0"
 }
 ```
 
@@ -87,15 +91,59 @@ val gestureManager = GestureManager.Builder(recyclerView)
 ```kotlin
     // Override foregroundView, backgroundView() variables in ViewHolder to provide top and bottom view
     open val foregroundView: View
-            get() = foregound
+            get() = foreground
             
     open val backgroundView: View?
             get() = background
 ```
+### Different background views:
+```xml
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Content of the background views -->
+    <include
+            android:id="@+id/month_background_one"
+            layout="@layout/first_background_item"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"/>
+
+    <include
+            android:id="@+id/month_background_two"
+            layout="@layout/second_background_item"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"/>
+    
+    <LinearLayout
+            android:id="@+id/foreground_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+            <!-- Content of the top view -->
+    </LinearLayout>
+</FrameLayout>
+```
+```kotlin
+    // Override foregroundView variable and getBackgroundView(direction: Int) method in ViewHolder to provide top and bottom views
+    open val foregroundView: View
+            get() = foreground
+            
+    override fun getBackgroundView(direction: Int): View? {
+            //direction can be ItemTouchHelper.LEFT, ItemTouchHelper.RIGHT, ItemTouchHelper.UP, ItemTouchHelper.DOWN
+            if (direction == ItemTouchHelper.RIGHT) {
+                return firstBackgroundView
+            }
+            return secondBackgroundView
+    }
+```
 ### Data callbacks:
 ```kotlin
 adapter.setDataChangeListener(object : GestureAdapter.OnDataChangeListener<MonthItem> {
-                        override fun onItemRemoved(item: MonthItem, position: Int) {
+                        override fun onItemRemoved(item: MonthItem, position: Int, direction: Int) {
                         }
         
                         override fun onItemReorder(item: MonthItem, fromPos: Int, toPos: Int) {
@@ -179,20 +227,57 @@ adapter.undoLast()
 adapter.setUndoSize(2)
 ```
 
+### Header/Footer:
+```kotlin
+// Enabled, disable header/footer by builder
+GestureManager.Builder(recyclerView)
+    .setHeaderEnabled(state)
+    .setFooterEnabled(state)
+
+// or directly by adapter
+adaper.setHeaderEnabled(state)
+adaper.setHeaderEnabled(state)
+
+// if header or footer is enabled then library will pass viewType (TYPE_HEADER_ITEM, TYPE_FOOTER_ITEM)
+// to onCreateViewHolder(parent: ViewGroup, viewType: Int)
+override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GestureViewHolder<T> {
+    return when (viewType) {
+            TYPE_HEADER_ITEM -> {
+                // return header view holder
+            }
+            TYPE_FOOTER_ITEM -> {
+                // return footer view holder
+            }
+            else -> {
+                // return regular view holder
+            }
+        }
+}
+
+// if getItemViewType(viewPosition: Int) is used in your adapter then
+// firstly call super.getItemViewType() and check if library wants to handle incoming view type
+override fun getItemViewType(viewPosition: Int): Int {
+    val handledType = super.getItemViewType(viewPosition)
+    if (handledType > 0) {
+        // library wants to handle this case, simply return
+        return handledType
+    }
+    return yourTypes
+}
+```
+
 # Help
 See examples.
 
 # To do
 * examples with data binding
 * tests
-* header/footer
 * different layouts for different swipe directions
-* proguard?
 
 # Licence
 
 ```
-Copyright 2019 thesurix
+Copyright 2022 thesurix
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
